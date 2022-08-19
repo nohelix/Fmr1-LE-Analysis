@@ -35,24 +35,26 @@ Full Model: <br>
 <center> Average Reaction time ~ Intensity * Genotype * Duration (Alone/Mixed) * Duration (ms) </center>
 ```{r Model, echo=TRUE}
 summary(Rxn.aov)
+
+sjstats::anova_stats(Rxn.aov)
 ```
 # Post Hoc Testing
 ### Single vs. Mixed Duration
 ```{r Duration Effect, fig.height = 9.5, fig.width = 8}
-TukeyHSD(a2, "ses")
+# TukeyHSD(Rxn.aov, "ses")
 
 ```
 
 ### Genotype
 ```{r Genotype Effect, fig.height = 9.5, fig.width = 8}
-kruskal.test(Rxn ~ Genotype, 
-             data = Rxn_overall_by_Duration %>% 
-                    filter(!(Duration == "Mixed")))
+# kruskal.test(Rxn ~ Genotype, 
+#              data = Rxn_overall_by_Duration %>% 
+#                     filter(!(Duration == "Mixed")))
 
 Rxn_overall_by_Duration %>%
   filter(!(Intensity %in% c("90"))) %>%
   filter(!(Duration == "50-300ms")) %>%
-  mutate(Genotype = str_extract(Genotype, "Het|WT")) %>%
+  mutate(Genotype = str_extract(Genotype, "KO|WT")) %>%
   ggplot(aes(x = Intensity, y = Rxn)) +
   # geom_point(aes(group = ID, color = Genotype), alpha = 0.3)+
   # geom_line(aes(group = ID, color = Genotype), alpha = 0.3)+
@@ -81,33 +83,33 @@ Rxn_overall_by_Duration %>%
 ### Genotype & Duration
 
 ```{r Combined, fig.height = 9.5, fig.width = 8}
-# kruskal.test(Rxn ~ interaction(Intensity, Duration, `Dur (ms)`), data = Rxn_overall_by_Duration)
+# # kruskal.test(Rxn ~ interaction(Intensity, Duration, `Dur (ms)`), data = Rxn_overall_by_Duration)
+# # 
+# # 
+# postHoc <- 
+#   dunnTest(Rxn ~ interaction(Genotype, Duration, `Dur (ms)`),
+#            data = Rxn_overall_by_Duration,
+#            method = "bonf")
 # 
+# # print(postHoc, dunn.test.results = TRUE)
 # 
-postHoc <- 
-  dunnTest(Rxn ~ interaction(Genotype, Duration, `Dur (ms)`),
-           data = Rxn_overall_by_Duration,
-           method = "bonf")
-
-# print(postHoc, dunn.test.results = TRUE)
-
-postHoc$res %>% 
-    as_tibble() %>%
-    select(-P.unadj) %>%
-    mutate(Sig = gtools::stars.pval(P.adj),
-           G1 = str_extract(.$Comparison, '_[:alpha:]+?\\.') %>% str_remove("_") %>% str_remove("\\."),
-           G2 = str_extract(.$Comparison, ' - Tsc2_LE_.*?[:punct:]') %>% str_remove(" - Tsc2_LE_") %>% str_remove("\\."),
-           Alone = str_extract(.$Comparison, '\\.[:digit:]+? - ') %>% str_remove("\\.") %>% str_remove(" - "),
-           Mixed = str_extract(.$Comparison, '\\.[:digit:]+?$') %>% str_remove("\\."),
-           P.adj = round(P.adj, digits = 3)) %>%
-    filter(G1 == G2 & Mixed == Alone) %>%
-  select(Alone, Mixed, G1, G2, Z, P.adj, Sig) %>%
-  arrange(G1, Alone)
+# postHoc$res %>% 
+#     as_tibble() %>%
+#     select(-P.unadj) %>%
+#     mutate(Sig = gtools::stars.pval(P.adj),
+#            G1 = str_extract(.$Comparison, '_[:alpha:]+?\\.') %>% str_remove("_") %>% str_remove("\\."),
+#            G2 = str_extract(.$Comparison, ' - Tsc2_LE_.*?[:punct:]') %>% str_remove(" - Tsc2_LE_") %>% str_remove("\\."),
+#            Alone = str_extract(.$Comparison, '\\.[:digit:]+? - ') %>% str_remove("\\.") %>% str_remove(" - "),
+#            Mixed = str_extract(.$Comparison, '\\.[:digit:]+?$') %>% str_remove("\\."),
+#            P.adj = round(P.adj, digits = 3)) %>%
+#     filter(G1 == G2 & Mixed == Alone) %>%
+#   select(Alone, Mixed, G1, G2, Z, P.adj, Sig) %>%
+#   arrange(G1, Alone)
 
 
 Rxn_overall_by_Duration %>%
   filter(!(Intensity %in% c("90"))) %>%
-  mutate(Genotype = str_extract(Genotype, "Het|WT")) %>%
+  mutate(Genotype = str_extract(Genotype, "KO|WT")) %>%
   ggplot(aes(x = Intensity, y = Rxn)) +
   # geom_point(aes(group = ID, color = Genotype), alpha = 0.3)+
   # geom_line(aes(group = ID, color = Genotype), alpha = 0.3)+
@@ -120,7 +122,7 @@ Rxn_overall_by_Duration %>%
                fun = mean,
                geom = "point", position = position_dodge(0.1), size = 3) +
   stat_summary(aes(color = Genotype, linetype = Duration, group = interaction(Genotype, Duration)), fun = mean, geom = "line") +
-  labs(title = "Tsc2 Eker",
+  labs(title = "Fmr1-LE",
        caption = paste("Data trough:", head(df$Date)),
        x = "Intensity (dB)",
        y = "Reaction time (ms, mean +/- SE)") +
