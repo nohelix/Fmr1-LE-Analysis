@@ -353,13 +353,16 @@ se <- function(x, ...) {sqrt(var(x, ...)/length(x))}
 # # Clean an entry ----------------------------------------------------------
 # 
 # # Find string in loaded list
-# str_which(loaded_files, "20220817.*RP5")
+# str_which(loaded_files, "20220819.*BP4")
 # # Check for correct entry
-# loaded_files[[221]]
+# loaded_files[[242]]
 # # remove item from list
-# loaded_files = loaded_files[-221]
+# loaded_files = loaded_files[-242]
 # 
 # # Check lines you are deleting
-# df %>% filter((Date < "2022-08-17" & Date > "2022-08-16" & ID == "RP 5"))
+# df %>% 
+#   filter((Date < "2022-08-19" & Date > "2022-08-18" & ID == "BP4")) %>% 
+#   View
 # # Clean files from the master dataframe
-# df = df %>% filter(!(Date < "2022-08-17" & Date > "2022-08-16" & ID == "RP 5"))
+# df = df %>% 
+#   filter(!(Date < "2022-08-19" & Date > "2022-08-18" & ID == "BP4"))
