@@ -35,8 +35,6 @@ Full Model: <br>
 <center> Average Reaction time ~ Intensity * Genotype * Duration (Alone/Mixed) * Duration (ms) </center>
 ```{r Model, echo=TRUE}
 summary(Rxn.aov)
-
-sjstats::anova_stats(Rxn.aov)
 ```
 # Post Hoc Testing
 ### Single vs. Mixed Duration
