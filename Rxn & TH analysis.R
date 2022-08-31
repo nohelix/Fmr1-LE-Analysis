@@ -87,10 +87,10 @@ Fmr1_Data <-
   # Filter out FA correction, Maintenance, & Errors
   filter(!(Phase %in% c("FA correction", "Maintaince", "Error"))) %>%
   # Filter out Training and retraining
-  filter(!(Phase %in% c("BBN Training", "Tone Training"))) %>%
+  filter(!(Phase %in% c("BBN Training", "Tone Training", "Handling"))) %>%
   mutate(
-    Intensity = gsub("BBN_(.*dB)_(.*?ms)_.*?s", "\\1", File), # extracts intensity from name of file
-    Duration = gsub("BBN_(.*dB)_(.*?ms)_.*?s", "\\2", File) # extracts duration from name of file
+    Intensity = gsub("BBN_(.*dB)_(.*?ms)_.*?s", "\\1", File) %>% str_remove("_TR\\d+ms"), # extracts intensity from name of file
+    Duration = gsub("BBN_(.*dB)_(.*?ms)_.*?s", "\\2", File) %>% str_remove("_TR\\d+ms") # extracts duration from name of file
   )
 
 rm(Fmr1_Data_Raw)

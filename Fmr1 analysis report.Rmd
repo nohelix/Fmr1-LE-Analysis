@@ -14,7 +14,7 @@ source("~/GitHub/Fmr1-LE Analysis/Rxn & TH analysis.R")
 # Stats
 ```{r Stats}
 writeLines(paste("Analysis run on", Sys.Date(), "
-           Data last loaded on", head(df$Date, 1), "adding", file_count, "new files.
+           Data last loaded on", head(sort(df$Date, decreasing = TRUE), 1), "adding", file_count, "new files.
            There were", nrow(Missing_files), "missing files."))
 ```
 
@@ -27,7 +27,7 @@ Rxn.aov = aov(Rxn ~ Intensity * Genotype * Duration * `Dur (ms)`, data = Rxn_ove
 
 is_parametric = shapiro.test(Rxn.aov$residuals)$p.value > 0.05
 
-if (is_parametric == TRUE) {writeLines("Normal data proced with ANOVA")} else 
+if (is_parametric == TRUE) {writeLines("Normal data proceed with ANOVA")} else 
   {writeLines(paste("Non-parametric data so use Kruskal followed by Dunn testing. \nShapiro Test: p =", shapiro.test(Rxn.aov$residuals)$p.value %>% round(digits = 3)))}
 ```
 
@@ -40,6 +40,34 @@ summary(Rxn.aov)
 ### Single vs. Mixed Duration
 ```{r Duration Effect, fig.height = 9.5, fig.width = 8}
 # TukeyHSD(Rxn.aov, "ses")
+
+Rxn_overall_by_Duration %>%
+  filter(!(Intensity %in% c("90"))) %>%
+  mutate(Genotype = str_extract(Genotype, "KO|WT")) %>%
+  ggplot(aes(x = Intensity, y = Rxn)) +
+  # geom_point(aes(group = ID, color = Genotype), alpha = 0.3)+
+  # geom_line(aes(group = ID, color = Genotype), alpha = 0.3)+
+  stat_summary(aes(linetype = Duration, group = Duration),
+               fun = mean,
+               fun.min = function(x) mean(x) - se(x),
+               fun.max = function(x) mean(x) + se(x),
+               geom = "errorbar", width = 1, position = position_dodge(0.1)) +
+  stat_summary(aes(shape = Duration, group = Duration),
+               fun = mean,
+               geom = "point", position = position_dodge(0.1), size = 3) +
+  stat_summary(aes(linetype = Duration, group = Duration), fun = mean, geom = "line") +
+  labs(title = "Fmr1-LE",
+       caption = paste("Date:", head(sort(df$Date, decreasing = TRUE))),
+       x = "Intensity (dB)",
+       y = "Reaction time (ms, mean +/- SE)") +
+  scale_x_continuous(breaks = seq(20, 80, by = 10)) +
+  facet_wrap(~ `Dur (ms)` , ncol = 1) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    panel.grid.major.x = element_line(color = rgb(235, 235, 235, 255, maxColorValue = 255))
+  )
+
 
 ```
 
@@ -66,7 +94,7 @@ Rxn_overall_by_Duration %>%
                geom = "point", position = position_dodge(0.1), size = 3) +
   stat_summary(aes(color = Genotype, group = Genotype), fun = mean, geom = "line") +
   labs(title = "Fmr1-LE",
-       caption = paste("Date:", head(df$Date)),
+       caption = paste("Date:", head(sort(df$Date, decreasing = TRUE))),
        x = "Intensity (dB)",
        y = "Reaction time (ms, mean +/- SE)") +
   scale_x_continuous(breaks = seq(20, 80, by = 10)) +
@@ -121,7 +149,7 @@ Rxn_overall_by_Duration %>%
                geom = "point", position = position_dodge(0.1), size = 3) +
   stat_summary(aes(color = Genotype, linetype = Duration, group = interaction(Genotype, Duration)), fun = mean, geom = "line") +
   labs(title = "Fmr1-LE",
-       caption = paste("Data trough:", head(df$Date)),
+       caption = paste("Data trough:", head(sort(df$Date, decreasing = TRUE))),
        x = "Intensity (dB)",
        y = "Reaction time (ms, mean +/- SE)") +
   scale_x_continuous(breaks = seq(20, 80, by = 10)) +
