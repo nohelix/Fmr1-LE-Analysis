@@ -306,7 +306,7 @@ Data_over_TH <-
   filter(Type == 1 & Response == "Hit") %>%
   filter(`Inten (dB)` != -100) %>%
   mutate(Rat = .$ID, Dur = .$`Dur (ms)`) %>%
-  group_by(Rat, Genotype, Dur, Duration) %>%
+  group_by(Rat, Genotype, Dur, Duration, Phase) %>%
   nest %>%
   mutate(data = map(data, TH_filter)) #%>% print
 
@@ -318,7 +318,7 @@ Rxn_overall <-
   filter(Type == 1 & Response == "Hit") %>%
   filter(`Inten (dB)` != -100) %>% 
   # Filter by TH table so that only reaction times above thresholds are included
-  group_by(ID, Genotype, `Dur (ms)`, `Inten (dB)`) %>%
+  group_by(ID, Genotype, `Dur (ms)`, `Inten (dB)`, Phase) %>%
   summarise(count = n_distinct(Date),
             Rxn = mean(`Reaction_(s)`, na.rm = TRUE) * 1000, 
             .groups = "drop") %>%
@@ -332,7 +332,7 @@ Rxn_overall_by_Duration <-
   filter(Type == 1 & Response == "Hit") %>%
   filter(`Inten (dB)` != -100) %>% 
   # Filter by TH table so that only reaction times above thresholds are included
-  group_by(ID, Genotype, Duration, `Dur (ms)`, `Inten (dB)`) %>%
+  group_by(ID, Genotype, Duration, `Dur (ms)`, `Inten (dB)`, Phase) %>%
   summarise(count = n_distinct(Date),
             Rxn = mean(`Reaction_(s)`, na.rm = TRUE) * 1000, 
             .groups = "drop") %>%
