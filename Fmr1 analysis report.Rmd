@@ -79,7 +79,8 @@ Rxn_overall_by_Duration %>%
 
 Rxn_overall_by_Duration %>%
   filter(!(Intensity %in% c("90"))) %>%
-  filter(!(Duration == "50-300ms")) %>%
+  # filter(!(Duration == "50-300ms")) %>%
+  # filter(!(Phase == "BBN Rotating")) %>%
   mutate(Genotype = str_extract(Genotype, "KO|WT")) %>%
   ggplot(aes(x = Intensity, y = Rxn)) +
   # geom_point(aes(group = ID, color = Genotype), alpha = 0.3)+
@@ -135,6 +136,7 @@ Rxn_overall_by_Duration %>%
 
 Rxn_overall_by_Duration %>%
   filter(!(Intensity %in% c("90"))) %>%
+  filter(!(Phase == "BBN Rotating")) %>%
   mutate(Genotype = str_extract(Genotype, "KO|WT")) %>%
   ggplot(aes(x = Intensity, y = Rxn)) +
   # geom_point(aes(group = ID, color = Genotype), alpha = 0.3)+
