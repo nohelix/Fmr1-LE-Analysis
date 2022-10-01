@@ -68,7 +68,7 @@ read_excel_allsheets <- function(filename, range, sheetlist, tibble = FALSE) {
 # data exceds that, it will not be loaded.
 
 # Load Fmr1 spreadsheet (hard coded)
-RatID_list <- excel_sheets("Fmr1-LE_Grp1_Black_Lime.xlsx")
+RatID_list <- excel_sheets("Fmr1-LE_Grp1_BP_LP_Purple.xlsx")
 
 # The message creation for the log is slow & spammy so I have suppressed the 'New Name' message
 Fmr1_Data_Raw <- read_excel_allsheets("Fmr1-LE_Grp1_BP_LP_Purple.xlsx", 
