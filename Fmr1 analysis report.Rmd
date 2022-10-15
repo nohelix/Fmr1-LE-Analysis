@@ -283,3 +283,8 @@ Rxn_overall_by_Duration %>%
   )
 
 ```
+
+```{r Save}
+save(df, loaded_files, Data_over_TH, Rxn, Rxn_overall_by_Duration, file = "Fmr1_analysis.Rdata")
+```
+
