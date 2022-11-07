@@ -10,7 +10,7 @@ editor_options:
 ```{r Data import & prep, include=FALSE}
 source("~/GitHub/Fmr1-LE Analysis/Rxn & TH analysis.R")
 
-partial.data = c("LP 3", "LP 4", "LP 5", "LP 6", "Purple 1", "Purple 2", "Purple 3", "Purple 4")
+partial.data = c("LP 3", "LP 5", "LP 6", "Purple 1", "Purple 2", "Purple 3", "Purple 4")
 ```
 
 # Stats
