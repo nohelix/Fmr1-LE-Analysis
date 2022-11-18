@@ -2,7 +2,7 @@
 
 # data loading/manipulation
 library(readxl); library(R.matlab)
-source("~/GitHub/Behavior-autoanalysis/fixed import.R")
+# source("~/GitHub/Behavior-autoanalysis/fixed import.R")
 library(tidyverse); library(dplyr); library(tidyr)
 
 # Analysis
@@ -89,8 +89,8 @@ Fmr1_Data <-
   # Filter out Training and retraining
   filter(!(Phase %in% c("BBN Training", "Tone Training", "Handling"))) %>%
   mutate(
-    Intensity = gsub("BBN_(.*dB)_(.*?ms)_.*?s", "\\1", File) %>% str_remove("_TR\\d+ms"), # extracts intensity from name of file
-    Duration = gsub("BBN_(.*dB)_(.*?ms)_.*?s", "\\2", File) %>% str_remove("_TR\\d+ms") # extracts duration from name of file
+    Intensity = gsub("(BBN|\\d+kHz)_(.*dB)_(.*?ms)_.*?s", "\\1", File) %>% str_remove("_TR\\d+ms"), # extracts intensity from name of file
+    Duration = gsub("(BBN|\\d+kHz)_(.*dB)_(.*?ms)_.*?s", "\\3", File) %>% str_remove("_TR\\d+ms") # extracts duration from name of file
   )
 
 rm(Fmr1_Data_Raw)
@@ -162,7 +162,7 @@ if(nrow(File_list_temp) > 0) {
     Duration = File_list_temp[[i, "Duration"]]
     writeLines(paste("Loading:", ID, "on", Date))
     current_file = readMat(file)
-    source("~/GitHub/Tsc2_Analysis/matlab import.R")
+    source(paste0(github, "GitHub/Tsc2_Analysis/matlab import.R"))
     loaded_files = append(loaded_files, file)
     df = run_data %>%
       mutate(ID = ID, Genotype = Genotype, Date = Date, Stim_Block = stim_block_size, Phase = Phase, Intensity = Intensity, Duration = Duration) %>%
@@ -215,15 +215,15 @@ writeLines("Calculating Thresholds")
 # Calculate d' and save (along with hit/miss/CR/FA table)
 TH_data <-
   df %>%
-  group_by(ID, Genotype, Phase, Duration, `Dur (ms)`, Type, `Inten (dB)`, Response) %>% 
+  group_by(ID, Genotype, Phase, Intensity,Duration, `Freq (kHz)`, `Dur (ms)`, Type, `Inten (dB)`, Response) %>% 
   summarise(count = n(), .groups = "keep") %>% 
   spread(Response, count) %>% #View
-  group_by(ID, Genotype, Phase, Duration) %>% #print
+  group_by(ID, Genotype, Phase, `Freq (kHz)`, Duration) %>% #print
   nest() %>%
   mutate(dprime_data = map(data, dprime_table)) %>% 
   select(-data) %>% 
   unnest(cols = c(dprime_data)) %>%
-  group_by(ID, Genotype, Phase, Duration, `Dur (ms)`) %>% #print
+  group_by(ID, Genotype, Phase, `Freq (kHz)`, Duration, `Dur (ms)`) %>% #print
   nest() %>%
   mutate(dprime = map(data, dprime_calc)) %>% #print
   unnest(dprime) #%>% print
@@ -239,25 +239,24 @@ TH_calc <- function(df) {
   # print(df)
   fit = loess(dprime ~ dB, data = df)
   # plot(fit)
-  TH = approx(x = fit$fitted, y = fit$x, xout = TH_cutoff)$y #%>% print
+  TH = approx(x = fit$fitted, y = fit$x, xout = TH_cutoff, ties = "ordered")$y #%>% print
   return(TH)
 }
 
 
 TH <-
   TH_data %>%
-  filter(Phase %in% c("BBN TH", "BBN Rxn")) %>%
   # filter(Duration == "50-300ms") %>%
   # filter(ID == "RP 6") %>%
   select(ID:`Dur (ms)`, dprime, dB) %>% #print
-  group_by(ID, Genotype, Duration, `Dur (ms)`)  %>%
+  group_by(ID, Genotype, `Freq (kHz)`, Duration, `Dur (ms)`)  %>%
   nest() %>%
   mutate(TH = map_dbl(data, TH_calc)) %>% #print
   select(-data) %>% #print
   mutate(Duration = case_when(Duration == "50ms" ~ "Alone",
                               Duration == "100ms" ~ "Alone",
                               Duration == "300ms" ~ "Alone",
-                              Duration == "50-300ms" ~ "50-300 (Mixed)",
+                              Duration == "50-300ms" ~ "50-300ms (Mixed)",
                               TRUE ~ as.character(Duration)),
          TH = round(TH, digits = 1))
 
@@ -268,16 +267,16 @@ TH_view <-
 
 
 # Reaction time from summary sheet ----------------------------------------
-
-Rxn <-
-  Fmr1_Data %>%
-  filter(Phase %in% c("BBN TH", "BBN Rxn", "BBN Rotating")) %>%
-  filter(Duration != "50-300ms") %>%
-  gather(key = "Intensity", value = "Rxn", 8:16) %>%
-  group_by(ID, Genotype, Duration, Intensity) %>%
-  summarise(count = n_distinct(Date),
-            Rxn = mean(`Rxn`, na.rm = T),
-            .groups = "keep")
+# 
+# Rxn <-
+#   Tsc_Data %>%
+#   filter(Phase %in% c("BBN TH", "BBN Rxn", "BBN Rotating")) %>%
+#   filter(Duration != "50-300ms") %>%
+#   gather(key = "Intensity", value = "Rxn", 8:16) %>%
+#   group_by(ID, Genotype, Duration, Intensity) %>%
+#   summarise(count = n_distinct(Date),
+#             Rxn = mean(`Rxn`, na.rm = T),
+#             .groups = "keep")
 
 # Reaction time calculation -----------------------------------------------
 
@@ -351,6 +350,7 @@ Rxn_overall_by_Duration <-
                               Duration == "300ms" ~ "Alone",
                               Duration == "50-300ms" ~ "Mix",
                               TRUE ~ as.character(Duration)))
+
 
 
 # Graphing ----------------------------------------------------------------
