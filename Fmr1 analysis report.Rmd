@@ -12,7 +12,7 @@ github = "Z:/"
 setwd(github)
 source(paste0(github, "GitHub/Fmr1-LE Analysis/Rxn & TH analysis.R"))
 
-partial.data = c("LP 5", "Purple 2", "Purple 3", "Purple 4")
+partial.data = c("LP 5", "Purple 3", "Purple 4")
 ```
 
 # Stats
